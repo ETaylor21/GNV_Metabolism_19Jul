@@ -375,6 +375,7 @@ bayes_specs <- specs(bayes_name, day_start = 4, day_end = 28, burnin_steps = 250
 
 mm <- metab(bayes_specs, data = Metab_inputs)
 
+
 mm
 
 output<-as.data.frame(get_params(mm))
