@@ -125,7 +125,7 @@ HAT_Q_data <- all_data3 %>%
 
 HAT_Q <- HAT_Q_data %>% 
   ggplot(aes(x = datetime)) + 
-  geom_area(aes(y = analyte), fill = '#56B4E9', color = '#56B4E9') +
+  geom_area(aes(y = result), fill = '#56B4E9', color = '#56B4E9') +
   theme(axis.title.x = element_blank()) +
   theme(legend.position = 'none') +
   theme(axis.text = element_text(size = 20)) +
@@ -345,6 +345,35 @@ TUM441_Q <- TUM441_Q_data %>%
 #####Multiplot of Metab and Q#####
 
 ggpubr::ggarrange(HAT_ts, HAT_Q, HOGDN_ts, HOGDN_Q, HOGUP_ts, HOGUP_Q, POS_ts, POS_Q, TUM441_ts, TUM441_Q, ncol = 1)
+
+
+#First install the gridExtra package and then run the following code
+
+library(gridExtra)
+
+
+g1<-ggplotGrob(HAT_ts)
+g2<-ggplotGrob(HAT_Q)
+g3<-ggplotGrob(HOGDN_ts)
+g4<-ggplotGrob(HOGDN_Q)
+g5<-ggplotGrob(HOGUP_ts)
+g6<-ggplotGrob(HOGUP_Q)
+g7<-ggplotGrob(POS_ts)
+g8<-ggplotGrob(POS_Q)
+g9<-ggplotGrob(TUM441_ts)
+g10<-ggplotGrob(TUM441_Q)
+.
+.
+gn<-ggplotGrob(pn)
+
+windows(height=Y, width=X)
+
+grid::grid.newpage()
+grid::grid.draw(rbind(g1,g2,g3, g4, g5, g6, g7, g8, g9, g10))
+                
+
+
+grid.export('myplot.svg')
 
 
 ####going to attempt to combine discharge and GPP and ER into a set of facets...maybe? ####
