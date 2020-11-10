@@ -22,7 +22,7 @@
 library(fasstr)
 library(streamMetabolizer)
 library(tidyverse)
-library (devtools)
+library(devtools)
 library(StreamPULSE)
 library(dplyr)
 library(lubridate)
@@ -48,7 +48,7 @@ HAT2 = HAT %>%
   filter(DateTime_UTC >= as.Date('2019-02-22') & DateTime_UTC <=  as.Date('2019-08-01')) %>% 
   filter(is.na(flagtype)) %>% 
   select(DateTime_UTC, variable, value) %>% 
-  spread(key = variable, value = value)
+  spread(key = 'variable', value = 'value')
 
 HAT2
 
@@ -266,7 +266,7 @@ Metab_inputs %>%
   gather(type, DO.value, starts_with('DO'), discharge) %>%
   mutate(units=ifelse(type == 'DO.pctsat', 'DO\n(% sat)', 'DO\n(mg/L)')) %>%
   ggplot(aes(x=solar.time, y=DO.value, color=type)) + geom_line() + 
-  facet_grid(units ~ ., scale='free_y') + theme_bw() +
+  facet_grid(units ~ ., scales = 'free_y') + theme_bw() +
   scale_color_discrete('variable')
 
 Metab_inputs = as.data.frame(Metab_inputs)
@@ -279,7 +279,7 @@ Metab_inputs = as.data.frame(Metab_inputs)
 #dat2 = as.data.frame(dat)
 #colnames(dat2) = c( 'solar.time', 'DO.obs', 'DO.sat', 'depth', 'temp.water', 'light', 'discharge')
 
-bayes_name <- mm_name(type='bayes', pool_K600='binned')
+bayes_name <- mm_name(type = 'bayes', pool_K600 = 'binned')
 bayes_name
 
 bayes_specs <- specs(bayes_name, day_start = 4, day_end = 28, burnin_steps = 500, saved_steps = 500)
@@ -352,9 +352,9 @@ Metab_inputs %>%
   mutate(DO.pctsat = 100 * (DO.obs / DO.sat)) %>%
   select(solar.time, discharge, starts_with('DO')) %>%
   gather(type, DO.value, starts_with('DO'), discharge) %>%
-  mutate(units=ifelse(type == 'DO.pctsat', 'DO\n(% sat)', 'DO\n(mg/L)')) %>%
-  ggplot(aes(x=solar.time, y=DO.value, color=type)) + geom_line() + 
-  facet_grid(units ~ ., scale='free_y') + theme_bw() +
+  mutate(units = ifelse(type == 'DO.pctsat', 'DO\n(% sat)', 'DO\n(mg/L)')) %>%
+  ggplot(aes(x = solar.time, y = DO.value, color = type)) + geom_line() + 
+  facet_grid(units ~ ., scales = 'free_y') + theme_bw() +
   scale_color_discrete('variable')
 
 Metab_inputs = as.data.frame(Metab_inputs)
@@ -387,7 +387,7 @@ plot_DO_preds(mm)
 plot_metab_preds(mm)
 
 mcmc <- get_mcmc(mm)
-rstan::traceplot(mcmc, pars='K600_daily', nrow=8)
+rstan::traceplot(mcmc, pars = 'K600_daily', nrow = 8)
 
 
 
@@ -462,9 +462,9 @@ Metab_inputs %>%
   mutate(DO.pctsat = 100 * (DO.obs / DO.sat)) %>%
   select(solar.time, discharge, starts_with('DO')) %>%
   gather(type, DO.value, starts_with('DO'), discharge) %>%
-  mutate(units=ifelse(type == 'DO.pctsat', 'DO\n(% sat)', 'DO\n(mg/L)')) %>%
-  ggplot(aes(x=solar.time, y=DO.value, color=type)) + geom_line() + 
-  facet_grid(units ~ ., scale='free_y') + theme_bw() +
+  mutate(units = ifelse(type == 'DO.pctsat', 'DO\n(% sat)', 'DO\n(mg/L)')) %>%
+  ggplot(aes(x = solar.time,y = DO.value, color = type)) + geom_line() + 
+  facet_grid(units ~ ., scales = 'free_y') + theme_bw() +
   scale_color_discrete('variable')
 
 Metab_inputs = as.data.frame(Metab_inputs)
@@ -477,7 +477,7 @@ Metab_inputs = as.data.frame(Metab_inputs)
 #dat2 = as.data.frame(dat)
 #colnames(dat2) = c( 'solar.time', 'DO.obs', 'DO.sat', 'depth', 'temp.water', 'light', 'discharge')
 
-bayes_name <- mm_name(type='bayes', pool_K600='binned')
+bayes_name <- mm_name(type = 'bayes', pool_K600 = 'binned')
 bayes_name
 
 bayes_specs <- specs(bayes_name, day_start = 4, day_end = 28, burnin_steps = 500, saved_steps = 500)
@@ -489,7 +489,7 @@ mm <- metab(bayes_specs, data = Metab_inputs)
 mm
 
 
-output<-as.data.frame(get_params(mm))
+output <- as.data.frame(get_params(mm))
 output#check output data
 
 write.csv(output, 'TUM441_Test_1_Output_20200207_v2.csv') #whatever filename is
@@ -498,6 +498,6 @@ plot_DO_preds(mm)
 plot_metab_preds(mm)
 
 mcmc <- get_mcmc(mm)
-rstan::traceplot(mcmc, pars='K600_daily', nrow=8)
+rstan::traceplot(mcmc, pars = 'K600_daily', nrow = 8)
 
 
