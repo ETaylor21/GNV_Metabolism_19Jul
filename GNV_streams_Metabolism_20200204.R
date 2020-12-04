@@ -100,7 +100,7 @@ HAT_metab_inputs = as.data.frame(HAT_metab_inputs)
 #dat2 = as.data.frame(dat)
 #colnames(dat2) = c( 'solar.time', 'DO.obs', 'DO.sat', 'depth', 'temp.water', 'light', 'discharge')
 
-bayes_name <- mm_name(type='bayes', pool_K600='binned')# I specified 'binned' in poll_k600 after recieving the error that discharge data should only be included if & only if pool_k600_type indicates hierarchy...not sure what that means but setting the poll_k600 to normal did nothing so I tried binned and it ran
+bayes_name <- mm_name(type='bayes', pool_K600='binned')# I specified 'binned' in poll_k600 after receiving the error that discharge data should only be included if & only if pool_k600_type indicates hierarchy...not sure what that means but setting the poll_k600 to normal did nothing so I tried binned and it ran
 bayes_name
 
 bayes_specs <- specs(bayes_name, day_start = 4, day_end = 28, burnin_steps = 500, saved_steps = 500)

@@ -2,25 +2,29 @@ library(tidyverse)
 library(gridExtra) 
 library(ggpubr)
 library(cowplot)
+library(viridis)
+library(hrbrthemes)
+library(esquisse)
 
+esquisse::esquisser()
 
 #####Only need to run this section to create the inital file which combines all the different metab info####
 
-files <- list.files("C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/Metabolism Output_20Feb07", pattern = "*.csv", full.names = T)
+#files <- list.files("C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/Metabolism Output_20Feb07", pattern = "*.csv", full.names = T)
 
-tbl <- sapply(files, read_csv, simplify=FALSE) %>% 
-  bind_rows(.id = "id")
+#tbl <- sapply(files, read_csv, simplify=FALSE) %>% 
+  #bind_rows(.id = "id")
 
-tbl
+#tbl
 
-metab_data <- tbl %>% 
-  select(id, date, GPP.daily, ER.daily, K600.daily) %>% 
-  filter(date >= as.Date('2019-02-23') & date <=  as.Date('2019-07-31') ) %>% 
-  na.omit(metab_data)
+#metab_data <- tbl %>% 
+  #select(id, date, GPP.daily, ER.daily, K600.daily) %>% 
+  #filter(date >= as.Date('2019-02-23') & date <=  as.Date('2019-07-31') ) %>% 
+  #na.omit(metab_data)
 
-metab_data
+#metab_data
 
-write_csv(metab_data, 'C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/Metabolism Output_20Feb07/GNV_Metab_all_20Feb07.csv')
+#(metab_data, 'C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/Metabolism Output_20Feb07/GNV_Metab_all_20Feb07.csv')
 
 #Couldn't figure out how to fix site ID so I had to do it manually#
 #####Read in metab combo file####
@@ -33,7 +37,8 @@ data <- read_csv("C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/Metabolis
 ), skip_empty_rows = T)
 
 
-data2 = as.data.frame(data)
+data2 <- as.data.frame(data) %>% 
+  filter(Site == 'HOGNW16' | Site == 'HOGDN' | Site == 'POS' | Site == 'TUM441' )
 
 data3 <- data %>% 
   gather(GPP_daily, ER_daily, key = 'daily', value = 'result') %>% 
@@ -54,6 +59,7 @@ nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E7
                                         labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) + 
   scale_shape_manual(labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin'),
                        values = c(15, 16, 17, 8, 7)) +
+  theme_ipsum_rc()
   theme(axis.text = element_text(size = rel(2.5))) +
   theme(axis.title = element_text(size = rel(3))) +
   theme(legend.position = c(0.90, 0.15)) +
@@ -64,6 +70,22 @@ nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E7
   
 
 nut_ts3
+
+###GPP v ER - Density ####
+nut_ts2 <- data2 %>% 
+  ggplot(aes(x = GPP_daily, y = ER_daily, color = Site)) + 
+  geom_density_2d(size = 1, position = 'jitter', aes(x = GPP_daily, y = ER_daily, color = Site)) + 
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  facet_wrap(. ~ Site, ncol = 4) + 
+  theme_ipsum_rc(axis_title_size = 17) +
+  theme(strip.text.x = element_blank()) +
+  scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E73', '#E69F00'), 
+                                        labels = c('S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) 
+
+nut_ts2
+
+ggsave("C:/Users/Emily/OneDrive - University of Florida/Dissertation/Proposal/Presentation_Figures/GPPvER_free_20Dec03.png", plot = nut_ts2, width = 14, height = 12)
+
 
 ####GPP and ER Timeseries####
 nut_ts3 <- data3 %>% 
@@ -126,15 +148,16 @@ HAT_Q_data <- all_data3 %>%
 HAT_Q <- HAT_Q_data %>% 
   ggplot(aes(x = datetime)) + 
   geom_area(aes(y = result), fill = '#56B4E9', color = '#56B4E9') +
+  theme_ipsum_rc(base_size = 12, plot_title_size = 26, axis_title_size = 15) + 
   theme(axis.title.x = element_blank()) +
   theme(legend.position = 'none') +
-  theme(axis.text = element_text(size = 20)) +
-  theme(axis.title = element_text(size = 20)) +
+  #theme(axis.text = element_text(size = 20)) +
+  #theme(axis.title = element_text(size = 20)) +
   ylab(expression('Q (m' [3]* 's'^-1*')')) +
   scale_y_continuous(breaks = c(0, 3))
   
 
-#HAT_Q
+HAT_Q
 
 ggpubr::ggarrange(HAT_ts, HAT_Q, ncol = 1)
 
@@ -159,6 +182,7 @@ HOGDN_ts <- HOGDN %>%
   labs(title = 'S. Hogtown') +
   scale_color_manual(values = c('#0072B2', '#0072B2'), 
                      labels = 'S. Hogtown') +
+  theme_ipsum_rc(base_size = 12, plot_title_size = 26, axis_title_size = 15) + 
   theme(axis.title.x = element_blank()) +
   #theme(axis.text.x = element_blank()) +
   theme(legend.position = 'none') +
@@ -177,15 +201,17 @@ HOGDN_Q_data <- all_data3 %>%
 HOGDN_Q <- HOGDN_Q_data %>% 
   ggplot(aes(x = datetime)) + 
   geom_area(aes(y = result), fill = '#0072B2', color = '#0072B2') +
+  theme_ipsum_rc(base_size = 12, plot_title_size = 18, axis_title_size = 15) + 
+  labs(title = 'S. Hogtown') +
   theme(axis.title.x = element_blank()) +
   theme(legend.position = 'none') +
-  theme(axis.text = element_text(size = 20)) +
-  theme(axis.title = element_text(size = 20)) +
+  #theme(axis.text = element_text(size = 20)) +
+  #theme(axis.title = element_text(size = 20)) +
   ylab(expression('Q (m' [3]* 's'^-1*')')) +
   scale_y_continuous(breaks = c(0, 6))
 
 
-#HOGDN_Q
+HOGDN_Q
 
 ggpubr::ggarrange(HOGDN_ts, HOGDN_Q, ncol = 1, align = 'h')
 
@@ -209,11 +235,12 @@ HOGUP_ts <- HOGUP %>%
   labs(title = 'N. Hogtown') +
   scale_color_manual(values = c('#009E73', '#009E73'), 
                      labels = 'N. Hogtown') +
+  theme_ipsum_rc(base_size = 12, plot_title_size = 26, axis_title_size = 15) + 
   theme(axis.title.x = element_blank()) +
   #theme(axis.text.x = element_blank()) +
   theme(legend.position = 'none') +
-  theme(axis.text = element_text(size = 20)) +
-  theme(axis.title = element_text(size = 20)) +
+  #theme(axis.text = element_text(size = 20)) +
+  #theme(axis.title = element_text(size = 20)) +
   ylab(expression('O'[2]* " Flux "* '(g O'[2] * ' m'^-2*'d'^-1*')')) +
   scale_y_continuous(breaks = c(0, -4))
   
@@ -222,7 +249,7 @@ HOGUP_ts <- HOGUP_ts +
   geom_path(data = HOGUP2, aes(x = datetime, y = result, color = '#009E73')) +
   geom_path(data = HOGUP3, aes(x = datetime, y = result, color = '#009E73'))
 
-#HOGUP_ts
+HOGUP_ts
 
 HOGUP_Q_data <- flow_data2 %>% 
   filter(Site == 'HOGNW16')
@@ -230,17 +257,19 @@ HOGUP_Q_data <- flow_data2 %>%
 HOGUP_Q <- HOGUP_Q_data %>% 
   ggplot(aes(x = datetime)) + 
   geom_area(aes(y = Discharge_m3s), fill = '#009E73', color = '#009E73') +
+  theme_ipsum_rc(base_size = 12, plot_title_size = 18, axis_title_size = 15) + 
+  labs(title = 'N. Hogtown') +
   theme(axis.title.x = element_blank()) +
   theme(legend.position = 'none') +
-  theme(axis.text = element_text(size = 20)) +
-  theme(axis.title = element_text(size = 20)) +
+  #theme(axis.text = element_text(size = 20)) +
+  #theme(axis.title = element_text(size = 20)) +
   ylab(expression('Q (m' [3]* 's'^-1*')')) +
   scale_y_continuous(breaks = c(0, 8))
 
 
-#HOGUP_Q
+HOGUP_Q
 
-#ggpubr::ggarrange(HOGUP_ts, HOGUP_Q, ncol = 1)
+ggpubr::ggarrange(HOGUP_ts, HOGUP_Q, ncol = 1)
 
 #####Possum#####
 
@@ -262,11 +291,12 @@ POS_ts <- POS %>%
   labs(title = 'Possum') +
   scale_color_manual(values = c('#669900', '#669900'),
                      labels = 'Possum') +
+  theme_ipsum_rc(base_size = 12, plot_title_size = 26, axis_title_size = 15) + 
   theme(axis.title.x = element_blank()) +
   #theme(axis.text.x = element_blank()) +
   theme(legend.position = 'none') +
-  theme(axis.text = element_text(size = 20)) +
-  theme(axis.title = element_text(size = 20)) +
+  #theme(axis.text = element_text(size = 20)) +
+  #theme(axis.title = element_text(size = 20)) +
   ylab(expression('O'[2]* " Flux "* '(g O'[2] * ' m'^-2*'d'^-1*')')) +
   scale_y_continuous(breaks = c(0, -8))
 
@@ -276,18 +306,21 @@ POS_ts <- POS_ts + geom_path(data = POS2, aes(x = datetime, y = result, color = 
 POS_Q_data <- flow_data2 %>% 
   filter(Site == 'POS')
 
+
 POS_Q <- POS_Q_data %>% 
   ggplot(aes(x = datetime)) + 
   geom_area(aes(y = Discharge_m3s), fill = '#669900', color = '#669900') +
+  theme_ipsum_rc(base_size = 12, plot_title_size = 18, axis_title_size = 15) + 
+  labs(title = 'Possum') +
   theme(axis.title.x = element_blank()) +
   theme(legend.position = 'none') +
-  theme(axis.text = element_text(size = 20)) +
-  theme(axis.title = element_text(size = 20)) +
+  #theme(axis.text = element_text(size = 20)) +
+  #theme(axis.title = element_text(size = 20)) +
   ylab(expression('Q (m' [3]* 's'^-1*')')) +
   scale_y_continuous(breaks = c(0, 4))
 
 
-#POS_Q
+POS_Q
 
 #ggpubr::ggarrange(POS_ts, POS_Q, ncol = 1)
 
@@ -327,24 +360,30 @@ TUM441_ts <- TUM441_ts + geom_path(data = TUM4412, aes(x = datetime, y = result,
 TUM441_Q_data <- flow_data2 %>% 
   filter(Site == 'TUM')
 
+summary(TUM441_Q_data)
+
 TUM441_Q <- TUM441_Q_data %>% 
   ggplot(aes(x = datetime)) + 
   geom_area(aes(y = Discharge_m3s), fill = '#D55E00', color = '#D55E00') +
+  theme_ipsum_rc(base_size = 12, plot_title_size = 18, axis_title_size = 15) +
+  labs(title = 'Tumblin') +
   theme(axis.title.x = element_blank()) +
   theme(legend.position = 'none') +
-  theme(axis.text = element_text(size = 20)) +
-  theme(axis.title = element_text(size = 20)) +
+  #theme(axis.text = element_text(size = 20)) +
+  #theme(axis.title = element_text(size = 20)) +
   ylab(expression('Q (m' [3]* 's'^-1*')')) +
-  scale_y_continuous(breaks = c(0, 0))
+  scale_y_continuous(breaks = c(0, 2))
 
 
-#TUM441_Q
+TUM441_Q
 
 #ggpubr::ggarrange(TUM441_ts, TUM441_Q, ncol = 1)
 
 #####Multiplot of Metab and Q#####
 
 ggpubr::ggarrange(HAT_ts, HAT_Q, HOGDN_ts, HOGDN_Q, HOGUP_ts, HOGUP_Q, POS_ts, POS_Q, TUM441_ts, TUM441_Q, ncol = 1)
+
+HOGDN_Q/HOGUP_Q/POS_Q/TUM441_Q
 
 
 #First install the gridExtra package and then run the following code
@@ -404,7 +443,7 @@ flow_data <- read_csv('C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/Meta
 
 flow_data2 = as.data.frame(flow_data)
 
-summary(flow_data2)
+summary(flow_data)
 
 #####Combine All the Data#####
 
@@ -424,8 +463,7 @@ all_data3 <- all_data2 %>%
   mutate(Site = factor(Site, levels =  c('HAT', 'HOGDN', 'HOGNW16', 'POS', 'TUM441')))
 
 
-flow_metab <- all_data2 %>% 
-  ggplot(aes(x = datetime, y = Discharge_m3s))
+flow_metab <- ggplot(flow_data, aes(x = datetime, y = Discharge_m3s))
 
 fm <- flow_metab + geom_area(aes(x = datetime, y = Discharge_m3s), fill = '#99CCFF') +
   facet_wrap( . ~ Site, nrow = 5, scales = 'free_y',
@@ -433,10 +471,12 @@ fm <- flow_metab + geom_area(aes(x = datetime, y = Discharge_m3s), fill = '#99CC
                                         HOGDN = 'S. Hogtown', 
                                         HOGNW16 = 'N. Hogtown', 
                                         POS = 'Possum', 
-                                        TUM441 = 'Tumblin'))) + 
+                                        TUM = 'Tumblin'))) + 
+  labs(y = 'Discharge (m3/s)')
   theme(strip.placement = 'outside', strip.text = element_text(size = rel(1.5))) +
   theme(axis.title.x = element_blank())
 
+fm
 
 fm2 <- fm + geom_point(aes(x = datetime, y = ER_daily)) +
   theme(legend.position = 'none') +
