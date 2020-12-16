@@ -71,6 +71,61 @@ nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E7
 
 nut_ts3
 
+###GPP v ER - No Hatchet####
+nut_ts2 <- data2 %>% 
+  ggplot(aes(x = GPP_daily, y = ER_daily, color = Site)) + 
+  geom_point(size = 6, position = 'jitter', aes(x = GPP_daily, y = ER_daily, color = Site, shape = Site)) + 
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')'))
+
+
+nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E73', '#E69F00'), 
+                                        labels = c('S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) + 
+  scale_shape_manual(labels = c('S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin'),
+                     values = c(15, 16, 17, 8, 7)) +
+  theme_ipsum_rc(axis_title_size = 15) +
+  theme(legend.position = 'bottom') +
+  theme(legend.title = element_text(size = rel(1.5), face = 'bold')) +
+  theme(legend.background = element_blank()) +
+  theme(legend.key = element_blank(), 
+        legend.text = element_text(size = rel(1.5))) +
+  facet_wrap(. ~ Site, ncol = 4) +
+  geom_smooth(method = lm) + 
+  labs(caption = 'Period of Record: February - July 2019') + 
+  theme(strip.text.x = element_blank())
+
+
+nut_ts3
+
+
+ggsave("C:/Users/Emily/OneDrive - University of Florida/Dissertation/Proposal/Presentation_Figures/GPPvER_lm_20Dec06.png", plot = nut_ts3, width = 18, height = 12)
+
+
+HOGDN <- data2 %>% 
+  filter(Site == 'HOGDN') %>% 
+  lm(formula = ER_daily ~ GPP_daily) %>% 
+  summary()
+
+HOGNW16 <- data2 %>% 
+  filter(Site == 'HOGNW16') %>% 
+  lm(formula = ER_daily ~ GPP_daily) %>% 
+  summary()
+
+POS <- data2 %>% 
+  filter(Site == 'POS') %>% 
+  lm(formula = ER_daily ~ GPP_daily) %>% 
+  summary()
+
+TUM441 <- data2 %>% 
+  filter(Site == 'TUM441') %>% 
+  lm(formula = ER_daily ~ GPP_daily) %>% 
+  summary()
+
+
+HOGDN
+HOGNW16
+POS
+TUM441
+
 ###GPP v ER - Density ####
 nut_ts2 <- data2 %>% 
   ggplot(aes(x = GPP_daily, y = ER_daily, color = Site)) + 
@@ -84,7 +139,7 @@ nut_ts2 <- data2 %>%
 
 nut_ts2
 
-ggsave("C:/Users/Emily/OneDrive - University of Florida/Dissertation/Proposal/Presentation_Figures/GPPvER_free_20Dec03.png", plot = nut_ts2, width = 14, height = 12)
+ggsave("C:/Users/Emily/OneDrive - University of Florida/Dissertation/Proposal/Presentation_Figures/GPPvER_free_20Dec04.png", plot = nut_ts2, width = 18, height = 12)
 
 
 ####GPP and ER Timeseries####
@@ -105,6 +160,32 @@ nut_ts3 <- data3 %>%
 
 
 nut_ts3
+
+
+
+
+#####GPP v ER - Option 2#####
+BARN = ggplot(data2, aes(x = date)) +
+  geom_area(aes(y = GPP_daily, fill = "GPP_daily")) +
+  geom_area(aes(y = ER_daily, fill = "ER_daily")) + 
+  labs(y = expression(paste("O"[2]," Flux (g O"[2], " m"^"-2", " d"^"-1", ")")), 
+       x = "Date") + 
+  ylim(-15,15) +
+  scale_fill_manual(values = wes_palette("Moonrise2", n = 2)) + 
+  facet_wrap( . ~ Site, nrow = 2, scales = 'free_y', 
+              labeller = as_labeller(c (HAT = 'Hatchet', 
+                                        HOGDN = 'S. Hogtown',
+                                        HOGNW16 = 'N. Hogtown', 
+                                        POS = 'Possum', 
+                                        TUM441 = 'Tumblin'))) +
+  theme_ipsum_rc(base_size = 24, plot_title_size = 36,  axis_title_size = 26) + 
+  theme(
+    legend.position = "none"
+  )
+
+BARN
+
+summary(data2)
 
 #####Individual GPP and ER plots with related Q to be combined later####
 
@@ -175,8 +256,22 @@ HOGDN2 <- HOGDN %>%
 HOGDN3 <- HOGDN %>% 
   filter(analyte == 'ER_daily')
 
+HOGDN <- data2 %>% 
+  filter(Site == 'HOGDN')
+
+
+
 HOGDN_ts <- HOGDN %>% 
-  ggplot(aes(x = datetime, y = result)) + 
+  ggplot(aes(x = date)) +
+  geom_area(aes(y = GPP_daily, fill = "GPP_daily")) +
+  geom_area(aes(y = ER_daily, fill = "ER_daily")) + 
+  labs(y = expression(paste("O"[2]," Flux (g O"[2], " m"^"-2", " d"^"-1", ")")), 
+       x = "Date") + 
+  ylim(-15, 15) +
+  scale_fill_manual(values = wes_palette("Moonrise2", n = 2)) + 
+    theme_ipsum_rc(base_size = 24, plot_title_size = 36,  axis_title_size = 26) + 
+  theme(legend.position = "none")
+
   geom_hline(aes(yintercept=0), colour="#000000", linetype="dashed") +
   geom_point(size = 4, aes(x = datetime, y = result, color = Site, shape = analyte)) +
   labs(title = 'S. Hogtown') +
@@ -212,6 +307,7 @@ HOGDN_Q <- HOGDN_Q_data %>%
 
 
 HOGDN_Q
+
 
 ggpubr::ggarrange(HOGDN_ts, HOGDN_Q, ncol = 1, align = 'h')
 
