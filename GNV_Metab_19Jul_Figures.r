@@ -38,7 +38,7 @@ data <- read_csv("C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/Metabolis
 
 
 data2 <- as.data.frame(data) %>% 
-  filter(Site == 'HOGNW16' | Site == 'HOGDN' | Site == 'POS' | Site == 'TUM441' )
+  filter(Site == 'HAT' |Site == 'HOGNW16' | Site == 'HOGDN' | Site == 'POS' | Site == 'TUM441' )
 
 data3 <- data %>% 
   gather(GPP_daily, ER_daily, key = 'daily', value = 'result') %>% 
@@ -59,7 +59,7 @@ nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E7
                                         labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) + 
   scale_shape_manual(labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin'),
                        values = c(15, 16, 17, 8, 7)) +
-  theme_ipsum_rc()
+  theme_ipsum_rc() 
   theme(axis.text = element_text(size = rel(2.5))) +
   theme(axis.title = element_text(size = rel(3))) +
   theme(legend.position = c(0.90, 0.15)) +
@@ -78,9 +78,9 @@ nut_ts2 <- data2 %>%
   ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')'))
 
 
-nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E73', '#E69F00'), 
-                                        labels = c('S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) + 
-  scale_shape_manual(labels = c('S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin'),
+nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E73', '#669900', '#D55E00'), 
+                                        labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) + 
+  scale_shape_manual(labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin'),
                      values = c(15, 16, 17, 8, 7)) +
   theme_ipsum_rc(axis_title_size = 15) +
   theme(legend.position = 'bottom') +
@@ -88,7 +88,7 @@ nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E7
   theme(legend.background = element_blank()) +
   theme(legend.key = element_blank(), 
         legend.text = element_text(size = rel(1.5))) +
-  facet_wrap(. ~ Site, ncol = 4) +
+  facet_wrap(. ~ Site, ncol = 5, nrow = 1) +
   geom_smooth(method = lm) + 
   labs(caption = 'Period of Record: February - July 2019') + 
   theme(strip.text.x = element_blank())
@@ -97,7 +97,13 @@ nut_ts3 <- nut_ts2 + scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E7
 nut_ts3
 
 
-ggsave("C:/Users/Emily/OneDrive - University of Florida/Dissertation/Proposal/Presentation_Figures/GPPvER_lm_20Dec06.png", plot = nut_ts3, width = 18, height = 12)
+ggsave("C:/Users/Emily/Documents/GitHub/GNV_EEMS/figures/GPPvER_lm_2021-05-05.png", plot = nut_ts3, width = 20, height = 12)
+
+
+HAT <- data2 %>% 
+  filter(Site == 'HAT') %>% 
+  lm(formula = ER_daily ~ GPP_daily) %>% 
+  summary()
 
 
 HOGDN <- data2 %>% 
@@ -120,7 +126,7 @@ TUM441 <- data2 %>%
   lm(formula = ER_daily ~ GPP_daily) %>% 
   summary()
 
-
+HAT
 HOGDN
 HOGNW16
 POS
