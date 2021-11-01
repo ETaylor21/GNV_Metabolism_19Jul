@@ -4,6 +4,7 @@ library(ggpubr)
 library(cowplot)
 library(viridis)
 library(hrbrthemes)
+library(wesanderson)
 library(esquisse)
 
 esquisse::esquisser()
@@ -134,8 +135,8 @@ nut_ts3
 
 ###GPP v ER - No Negatives####
 nut_neg <- data_neg %>% 
-   ggplot(aes(x = K600.daily, y = ER.daily, color = Site)) + 
-   geom_point(size = 6, position = 'jitter', aes(x = K600.daily, y = ER.daily, color = Site, shape = Site)) + 
+   ggplot(aes(x = GPP.daily, y = ER.daily, color = Site)) + 
+   geom_point(size = 6, position = 'jitter', aes(x = GPP.daily, y = ER.daily, color = Site, shape = Site)) + 
    ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) 
 
 nut_ts4 <- nut_neg + 
@@ -228,15 +229,15 @@ nut_ts3 <- data3 %>%
   theme_ipsum_rc(axis_title_size = 25, axis_text_size = 20, caption_size = 15) +
   theme(axis.title.x = element_blank()) +
   theme(legend.position = 'none')
-  #remove x-axis title of "date"...unecessary
+  #remove x-axis title of "date"...unnecessary
 
 
 nut_ts3
 
-ggsave("C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/figures/GPPER_ts_2021-05-10.png",
-              plot = nut_ts3,
-              width = 18,
-              height = 12)
+# ggsave("C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/figures/GPPER_ts_2021-05-10.png",
+#               plot = nut_ts3,
+#               width = 18,
+#               height = 12)
 
 
 # Boxplot Averages  -------------------------------------------------------
@@ -282,7 +283,7 @@ ggsave("C:/Users/Emily/Documents/GitHub/GNV_Metabolism_19Jul/figures/GPP_box_202
 
 
 #####GPP v ER - Option 2#####
-BARN = ggplot(data2, aes(x = date)) +
+BARN <- ggplot(data2, aes(x = date)) +
   geom_area(aes(y = GPP.daily, fill = "GPP.daily")) +
   geom_area(aes(y = ER.daily, fill = "ER.daily")) + 
   labs(y = expression(paste("O"[2]," Flux (g O"[2], " m"^"-2", " d"^"-1", ")")), 
@@ -683,3 +684,49 @@ flow_ERmetab + scale_y_continuous(sec.axis = sec_axis(~ . + 0, name = 'ER (g m^-
 
 flow_ERmetab
 
+
+# Just GPP ----------------------------------------------------------------
+
+gpp_ts <- data_neg %>% 
+  ggplot(aes(x = date, y = GPP.daily)) + 
+  # geom_hline(aes(yintercept=0), colour="#000000", linetype="dashed") +
+  geom_point(aes(x = date, y = GPP.daily, color = Site), size = 4) +
+  labs(y = expression(paste("O"[2]," Flux (g O"[2], " m"^"-2", " d"^"-1", ")")), 
+       x = "Date", 
+       caption = 'Period of Record: February - July 2019') +
+  scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E73', '#669900', '#D55E00'), 
+                     labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) +
+  facet_wrap( . ~ Site, nrow = 5, , scales = 'free_y',  
+              labeller = as_labeller(c (HAT = 'Hatchet', 
+                                        HOGDN = 'S. Hogtown',
+                                        HOGUP = 'N. Hogtown', 
+                                        POS = 'Possum', 
+                                        TUM = 'Tumblin'))) +
+  theme_ipsum_rc(axis_title_size = 25, axis_text_size = 20, caption_size = 15) +
+  theme(axis.title.x = element_blank()) +
+  theme(legend.position = 'none')
+#remove x-axis title of "date"...unnecessary
+
+
+gpp_ts
+
+#####GPP v ER - Option 2#####
+gpp_ts2 <- ggplot(data_neg, aes(x = date)) +
+  geom_area(aes(y = GPP.daily, fill = "GPP.daily")) +
+  geom_area(aes(y = ER.daily, fill = "ER.daily")) +
+  labs(y = expression(paste("O"[2]," Flux (g O"[2], " m"^"-2", " d"^"-1", ")")), 
+       x = "Date") + 
+  ylim(-10,10) +
+  scale_fill_manual(values = wes_palette("Moonrise2", n = 2)) + 
+  facet_wrap( . ~ Site, nrow = 2, scales = 'free_y', 
+              labeller = as_labeller(c (HAT = 'Hatchet', 
+                                        HOGDN = 'S. Hogtown',
+                                        HOGUP = 'N. Hogtown', 
+                                        POS = 'Possum', 
+                                        TUM = 'Tumblin'))) +
+  theme_ipsum_rc(base_size = 24, plot_title_size = 36,  axis_title_size = 26) + 
+  theme(
+    legend.position = "none"
+  )
+
+gpp_ts2
