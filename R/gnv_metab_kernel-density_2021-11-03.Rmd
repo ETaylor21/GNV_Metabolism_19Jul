@@ -1,0 +1,372 @@
+---
+title: "Metabolism - Kernel Density"
+output: html_notebook
+---
+
+Notes on kernel density analysis can be found [here](https://bookdown.org/egarpor/NP-UC3M/#welcome)
+
+
+```{r set-up, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE, include = FALSE, paged.print = TRUE, fig.width = 12, fig.height = 10}
+
+librarian::shelf(ks, tidyverse, MaizePal, hrbrthemes, corrplot, EnvStats, patchwork)
+
+
+```
+
+## Read data in for analysis 
+```{r, message = FALSE, warning = FALSE}
+data <- read_csv("C:/Users/Emily/Documents/Projects/GNV_Metabolism_19Jul/output/GNV_Metab_all_2021-05-09.csv", skip_empty_rows = T)
+
+
+data2 <- as.data.frame(data) %>% 
+  filter(Site == 'HAT' |Site == 'HOGUP' | Site == 'HOGDN' | Site == 'POS' | Site == 'TUM' ) 
+
+data_neg <- as.data.frame(data) %>% 
+  filter(Site == 'HAT' |Site == 'HOGUP' | Site == 'HOGDN' | Site == 'POS' | Site == 'TUM' ) %>% 
+  filter(GPP.daily >= 0)
+
+data3 <- data %>% 
+  gather(GPP.daily, ER.daily, key = 'daily', value = 'result') %>% 
+  mutate(Site = factor(Site, levels =  c('HAT', 'HOGDN', 'HOGUP', 'POS', 'TUM'))) 
+
+nut_ts <- data3 %>% 
+  ggplot(aes(x = date, y = result)) + 
+  geom_point(size = 4, aes(x = date, y = result, color = daily, shape = Site)) 
+nut_ts
+
+```
+## Check GPP Distributions
+
+```{r warning = FALSE}
+str(data_neg)
+summary(data_neg)
+
+sum_data <-  data_neg %>%
+  group_by(Site) %>% 
+  summarise(mean = mean(GPP.daily), median = median(GPP.daily), min = min(GPP.daily), max = max(GPP.daily))
+sum_data
+
+mean_GPP <- mean(data_neg$GPP.daily, na.rm = T)
+median_GPP <- median(data_neg$GPP.daily, na.rm = T)
+
+#Get a histogram of the distribution of weight
+gpop <- ggplot(data = data_neg) + #set data to NULL if you want to use 2 different data sets
+  geom_histogram(data = data_neg, mapping = aes(x = log(GPP.daily), fill = Site)) +
+  geom_vline(aes(xintercept= mean_GPP), color = "blue", size = 2)+
+  geom_vline(aes(xintercept= median_GPP), color = "orange", size = 2)
+
+gpop
+
+gbox <- ggplot(data = data_neg) + #set data to NULL if you want to use 2 different data sets
+  geom_boxplot(data = data_neg, mapping = aes(x= Site, y = GPP.daily, fill = Site)) + 
+  scale_fill_manual(values = c('#56B4E9', '#0072B2', '#009E73', '#669900', '#D55E00'), 
+                    labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) +
+  geom_point(data = data_neg, mapping = aes (x = Site, y = GPP.daily), 
+             position = position_jitter(height = 0, width = 0.1), alpha = 0.15, size = 2) +
+  labs(y = expression(paste("Daily GPP (O"[2]," Flux (g O"[2], " m"^"-2", " d"^"-1", "))")), 
+       caption = 'Period of Record: February - July 2019') +
+  theme_ipsum_rc(axis_title_size = 25, axis_text_size = 20, caption_size = 15) +
+  theme(legend.position = "blank")
+
+gbox
+
+outliers<-rosnerTest(log(data_neg$GPP.daily), k = 20)
+outliers$all.stats
+
+#Assessing normality
+#quick transformations that may work:
+hist(data_neg$GPP.daily)
+hist(log(data_neg$GPP.daily))
+hist(sqrt(data_neg$GPP.daily))
+
+
+```
+
+## Check ER Distributions
+
+```{r warning = FALSE}
+str(data_neg)
+summary(data_neg)
+
+sum_data <-  data_neg %>%
+  group_by(Site) %>% 
+  summarise(mean = mean(ER.daily), median = median(ER.daily), min = min(ER.daily), max = max(ER.daily))
+sum_data
+
+mean_ER <- mean(data_neg$ER.daily, na.rm = T)
+median_ER <- median(data_neg$ER.daily, na.rm = T)
+
+gbox <- ggplot(data = data_neg) + #set data to NULL if you want to use 2 different data sets
+  geom_boxplot(data = data_neg, mapping = aes(x= Site, y = ER.daily, fill = Site)) + 
+  scale_fill_manual(values = c('#56B4E9', '#0072B2', '#009E73', '#669900', '#D55E00'), 
+                    labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) +
+  geom_point(data = data_neg, mapping = aes (x = Site, y = ER.daily), 
+             position = position_jitter(height = 0, width = 0.1), alpha = 0.15, size = 2) +
+  labs(y = expression(paste("Daily ER (O"[2]," Flux (g O"[2], " m"^"-2", " d"^"-1", "))")), 
+       caption = 'Period of Record: February - July 2019') +
+  theme_ipsum_rc(axis_title_size = 25, axis_text_size = 20, caption_size = 15) +
+  theme(legend.position = "blank")
+
+gbox
+
+# Get a histogram of the distribution of weight
+gpop <- ggplot(data = data_neg) + #set data to NULL if you want to use 2 different data sets
+  geom_histogram(data = data_neg, mapping = aes(x = ER.daily, fill = Site)) +
+  geom_vline(aes(xintercept= mean_ER), color = "blue", size = 2)+
+  geom_vline(aes(xintercept= median_ER), color = "orange", size = 2)
+
+gpop
+
+outliers<-rosnerTest(data_neg$ER.daily, k = 20)
+outliers$all.stats
+
+# Assessing normality
+# quick transformations that may work:
+hist(data_neg$ER.daily)
+
+
+```
+
+```{r Hatchet}
+HAT <- data_neg %>% 
+  filter(Site == 'HAT') %>% 
+  select(GPP.daily, ER.daily)
+
+hist(HAT$GPP.daily)
+hist(HAT$ER.daily)
+
+kde <- ks::kde(x = HAT)
+str(kde$eval.points)
+
+# The grids in kde$eval.points are crossed in order to compute a grid matrix
+# where to evaluate the estimate
+dim(kde$estimate)
+## [1] 151 151
+
+# Manual plotting using the kde object structure
+image(kde$eval.points[[1]],
+  kde$eval.points[[2]],
+  kde$estimate,
+  col = viridis::viridis(20),
+  xlab = "GPP",
+  ylab = "ER", 
+  ylim = rev(range(kde$eval.points[[2]]))) 
+# Filled contour with custom color palette in "col.fun"
+plot(kde, display = "filled.contour2", cont = seq(5, 95, by = 10),
+     xlab = "GPP", ylab = "ER", col.fun = viridis::viridis, 
+  ylim = rev(range(kde$eval.points[[2]])))
+plot(kde, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
+
+```
+
+```{r HOGDN}
+ HOGDN <- data_neg %>% 
+  filter(Site == 'HOGDN') %>% 
+  mutate(GPP.daily.log = log(GPP.daily)) %>% 
+  select(GPP.daily, ER.daily) 
+
+# hist(HOGDN$GPP.daily.log)
+# hist(HOGDN$ER.daily)
+
+hd <- ks::kde(x = HOGDN)
+str(kde$eval.points)
+
+# The grids in kde$eval.points are crossed in order to compute a grid matrix
+# where to evaluate the estimate
+dim(hd$estimate)
+
+
+# Manual plotting using the kde object structure
+image(hd$eval.points[[1]],
+  hd$eval.points[[2]],
+  hd$estimate,
+  col = viridis::viridis(20),
+  xlab = "GPP",
+  ylab = "ER", 
+  ylim = rev(range(kde$eval.points[[2]]))) 
+# Filled contour with custom color palette in "col.fun"
+plot(hd, display = "filled.contour2", cont = seq(5, 95, by = 10),
+     xlab = "GPP", ylab = "ER", col.fun = viridis::viridis, 
+  ylim = rev(range(hd$eval.points[[2]])))
+plot(hd, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
+
+```
+```{r HOGUP}
+HOGUP <- data_neg %>% 
+  filter(Site == 'HOGUP') %>% 
+  select(GPP.daily, ER.daily) 
+  
+
+hist(HOGUP$GPP.daily)
+hist(HOGUP$ER.daily)
+
+hu <- ks::kde(x = HOGUP)
+str(kde$eval.points)
+
+# The grids in kde$eval.points are crossed in order to compute a grid matrix
+# where to evaluate the estimate
+dim(hu$estimate)
+
+
+# Manual plotting using the kde object structure
+image(hu$eval.points[[1]],
+  hu$eval.points[[2]],
+  hu$estimate,
+  col = viridis::viridis(20),
+  xlab = "GPP",
+  ylab = "ER", 
+  ylim = rev(range(kde$eval.points[[2]]))) 
+# Filled contour with custom color palette in "col.fun"
+plot(hu, display = "filled.contour2", cont = seq(5, 95, by = 10),
+     xlab = "GPP", ylab = "ER", col.fun = viridis::viridis, 
+  ylim = rev(range(hu$eval.points[[2]])))
+plot(hu, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
+
+```
+```{r POS}
+POS <- data_neg %>% 
+  filter(Site == 'POS') %>% 
+    mutate(GPP.daily.log = log(GPP.daily)) %>% 
+  select(GPP.daily, ER.daily)
+
+POS.l <- data_neg %>% 
+  filter(Site == 'POS') %>% 
+    mutate(GPP.daily.log = log(GPP.daily)) %>% 
+  select(GPP.daily.log, ER.daily) 
+  
+
+# hist(POS$GPP.daily.log)
+# hist(POS$ER.daily)
+
+po <- ks::kde(x = POS)
+str(kde$eval.points)
+
+# The grids in kde$eval.points are crossed in order to compute a grid matrix
+# where to evaluate the estimate
+dim(po$estimate)
+
+
+# Manual plotting using the kde object structure
+image(po$eval.points[[1]],
+  po$eval.points[[2]],
+  po$estimate,
+  col = viridis::viridis(20),
+  xlab = "GPP",
+  ylab = "ER", 
+  ylim = rev(range(kde$eval.points[[2]]))) 
+# Filled contour with custom color palette in "col.fun"
+plot(po, display = "filled.contour2", cont = seq(5, 95, by = 10),
+     xlab = "GPP", ylab = "ER", col.fun = viridis::viridis, 
+  ylim = rev(range(po$eval.points[[2]])))
+plot(po, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
+
+```
+```{r TUM}
+TUM <- data_neg %>% 
+  filter(Site == 'TUM') %>% 
+  select(GPP.daily, ER.daily) 
+
+
+hist(TUM$GPP.daily)
+hist(TUM$ER.daily)
+
+tu <- ks::kde(x = TUM)
+str(kde$eval.points)
+
+# The grids in kde$eval.points are crossed in order to compute a grid matrix
+# where to evaluate the estimate
+dim(tu$estimate)
+
+
+# Manual plotting using the kde object structure
+image(tu$eval.points[[1]],
+  tu$eval.points[[2]],
+  tu$estimate,
+  col = viridis::viridis(20),
+  xlab = "GPP",
+  ylab = "ER", 
+  ylim = rev(range(kde$eval.points[[2]]))) 
+# Filled contour with custom color palette in "col.fun"
+plot(tu, display = "filled.contour2", cont = seq(5, 95, by = 10),
+     xlab = "GPP", ylab = "ER", col.fun = viridis::viridis, 
+  ylim = rev(range(tu$eval.points[[2]])))
+plot(tu, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
+
+```
+
+```{r tidy-density,  fig.width = 12, fig.height = 8}
+
+data_den <- data_neg %>% 
+   select(Site, GPP.daily, ER.daily)
+
+dens <- data_den %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point() +
+  geom_density_2d() + 
+  facet_wrap(vars(Site),scales = 'free') + 
+  scale_y_reverse() +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 17) +
+  theme(strip.text.x = element_blank()) +
+  scale_color_manual(values = c('#56B4E9', '#0072B2', '#009E73', '#669900', '#D55E00'), 
+                                        labels = c('Hatchet','S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin')) 
+
+dens
+```
+
+```{r, warnings = FALSE}
+# scale_color_discrete(values = c('#56B4E9', '#0072B2', '#009E73', '#669900', '#D55E00'), 
+#                     labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin'))
+
+h <- HAT %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#56B4E9") +
+  labs(title = 'Hatchet') +
+  # scale_y_reverse() +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 17)
+  
+
+hd <- HOGDN %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#0072B2") +
+  labs(title = 'S. Hogtown') +
+  # scale_y_reverse() +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 17)
+
+hu <- HOGUP %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#009E73") +
+  labs(title = 'N. Hogtown') +
+  # scale_y_reverse() +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 17)
+
+p <- POS %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#669900") +
+  labs(title = 'Possum') +
+  # scale_y_reverse() +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 17)
+
+t <- TUM %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#D55E00") +
+  labs(title = 'Tumblin') +
+  # scale_y_reverse() +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 17)
+
+(h/hd)|(hu/p)|t
+
+h+hd+hu+p+t
+
+```
+
