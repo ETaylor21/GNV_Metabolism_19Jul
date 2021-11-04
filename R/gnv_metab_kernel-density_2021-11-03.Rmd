@@ -37,7 +37,7 @@ nut_ts
 ```
 ## Check GPP Distributions
 
-```{r warning = FALSE}
+```{r warning = FALSE, echo = FALSE}
 str(data_neg)
 summary(data_neg)
 
@@ -84,7 +84,7 @@ hist(sqrt(data_neg$GPP.daily))
 
 ## Check ER Distributions
 
-```{r warning = FALSE}
+```{r warning = FALSE, echo = FALSE}
 str(data_neg)
 summary(data_neg)
 
@@ -127,7 +127,7 @@ hist(data_neg$ER.daily)
 
 ```
 
-```{r Hatchet}
+```{r Hatchet, echo = FALSE}
 HAT <- data_neg %>% 
   filter(Site == 'HAT') %>% 
   select(GPP.daily, ER.daily)
@@ -159,7 +159,7 @@ plot(kde, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
 
 ```
 
-```{r HOGDN}
+```{r HOGDN, echo = FALSE}
  HOGDN <- data_neg %>% 
   filter(Site == 'HOGDN') %>% 
   mutate(GPP.daily.log = log(GPP.daily)) %>% 
@@ -191,7 +191,7 @@ plot(hd, display = "filled.contour2", cont = seq(5, 95, by = 10),
 plot(hd, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
 
 ```
-```{r HOGUP}
+```{r HOGUP, echo = FALSE}
 HOGUP <- data_neg %>% 
   filter(Site == 'HOGUP') %>% 
   select(GPP.daily, ER.daily) 
@@ -223,7 +223,7 @@ plot(hu, display = "filled.contour2", cont = seq(5, 95, by = 10),
 plot(hu, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
 
 ```
-```{r POS}
+```{r POS, echo = FALSE}
 POS <- data_neg %>% 
   filter(Site == 'POS') %>% 
     mutate(GPP.daily.log = log(GPP.daily)) %>% 
@@ -261,7 +261,7 @@ plot(po, display = "filled.contour2", cont = seq(5, 95, by = 10),
 plot(po, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
 
 ```
-```{r TUM}
+```{r TUM, echo = FALSE}
 TUM <- data_neg %>% 
   filter(Site == 'TUM') %>% 
   select(GPP.daily, ER.daily) 
@@ -294,7 +294,7 @@ plot(tu, display = "slice", cont = seq(5, 95, by = 10), add = TRUE)
 
 ```
 
-```{r tidy-density,  fig.width = 12, fig.height = 8}
+```{r tidy-density,  fig.width = 12, fig.height = 8, warning = FALSE, message = FALSE, echo = FALSE}
 
 data_den <- data_neg %>% 
    select(Site, GPP.daily, ER.daily)
@@ -314,18 +314,15 @@ dens <- data_den %>%
 dens
 ```
 
-```{r, warnings = FALSE}
-# scale_color_discrete(values = c('#56B4E9', '#0072B2', '#009E73', '#669900', '#D55E00'), 
-#                     labels = c('Hatchet', 'S. Hogtown', 'N. Hogtown', 'Possum', 'Tumblin'))
-
+```{r, warning = FALSE, message = FALSE, echo = FALSE, fig.width = 12, fig.height = 8}
 h <- HAT %>% 
   ggplot(aes(x = GPP.daily, y = ER.daily)) + 
   geom_point(alpha = 0.5, size = 2) +
   geom_density_2d(size = 1.25, color = "#56B4E9") +
   labs(title = 'Hatchet') +
-  # scale_y_reverse() +
+  ylim(-12, 0) + xlim(0, 4) +
   ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
-  theme_ipsum_rc(axis_title_size = 17)
+  theme_ipsum_rc(axis_title_size = 12)
   
 
 hd <- HOGDN %>% 
@@ -335,7 +332,7 @@ hd <- HOGDN %>%
   labs(title = 'S. Hogtown') +
   # scale_y_reverse() +
   ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
-  theme_ipsum_rc(axis_title_size = 17)
+  theme_ipsum_rc(axis_title_size = 12)
 
 hu <- HOGUP %>% 
   ggplot(aes(x = GPP.daily, y = ER.daily)) + 
@@ -344,7 +341,7 @@ hu <- HOGUP %>%
   labs(title = 'N. Hogtown') +
   # scale_y_reverse() +
   ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
-  theme_ipsum_rc(axis_title_size = 17)
+  theme_ipsum_rc(axis_title_size = 12)
 
 p <- POS %>% 
   ggplot(aes(x = GPP.daily, y = ER.daily)) + 
@@ -353,7 +350,7 @@ p <- POS %>%
   labs(title = 'Possum') +
   # scale_y_reverse() +
   ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
-  theme_ipsum_rc(axis_title_size = 17)
+  theme_ipsum_rc(axis_title_size = 12)
 
 t <- TUM %>% 
   ggplot(aes(x = GPP.daily, y = ER.daily)) + 
@@ -362,11 +359,82 @@ t <- TUM %>%
   labs(title = 'Tumblin') +
   # scale_y_reverse() +
   ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
-  theme_ipsum_rc(axis_title_size = 17)
+  theme_ipsum_rc(axis_title_size = 12)
 
-(h/hd)|(hu/p)|t
+# (h/hd)|(hu/p)|t
 
-h+hd+hu+p+t
+den_figs <- h+hd+hu+p+t
+
+ggsave(filename = "kd_scale_2021-11-04.png", plot = den_figs, path = "C:/Users/Emily/Documents/Projects/GNV_Metabolism_19Jul/figures", width = 12, height = 8)
+
+```
+
+```{r, warning = FALSE, message = FALSE, echo = FALSE, fig.width = 12, fig.height = 8}
+h <- HAT %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#56B4E9") +
+  labs(title = 'Hatchet') +
+  ylim(-12, 0) + xlim(0, 4) +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 12)
+  
+
+hd <- HOGDN %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#0072B2") +
+  labs(title = 'S. Hogtown') +
+  ylim(-12, 0) + xlim(0, 4) +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 12)
+
+hu <- HOGUP %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#009E73") +
+  labs(title = 'N. Hogtown') +
+  ylim(-12, 0) + xlim(0, 4) +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 12)
+
+p <- POS %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#669900") +
+  labs(title = 'Possum') +
+  ylim(-12, 0) + xlim(0, 4) +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 12)
+
+t <- TUM %>% 
+  ggplot(aes(x = GPP.daily, y = ER.daily)) + 
+  geom_point(alpha = 0.5, size = 2) +
+  geom_density_2d(size = 1.25, color = "#D55E00") +
+  labs(title = 'Tumblin') +
+  ylim(-12, 0) + xlim(0, 4) +
+  ylab(expression('ER (g O'[2] * ' m'^-2*'d'^-1*')')) + xlab(expression('GPP (g O'[2] * ' m'^-2*'d'^-1*')')) +
+  theme_ipsum_rc(axis_title_size = 12)
+
+# (h/hd)|(hu/p)|t
+
+den_figs_scale <- h+hd+hu+p+t
+
+ggsave(filename = "kd_scale_2021-11-04.png", plot = den_figs_scale, path = "C:/Users/Emily/Documents/Projects/GNV_Metabolism_19Jul/figures", width = 12, height = 8)
+
+```
+
+```{r}
+
+data_4 <- as.data.frame(data) %>% 
+  filter(Site == 'HAT' |Site == 'HOGUP' | Site == 'HOGDN' | Site == 'POS' | Site == 'TUM' ) %>% 
+  filter(GPP.daily >= 0) %>% 
+  mutate(Site = factor(Site, levels =  c('HAT', 'HOGDN', 'HOGUP', 'POS', 'TUM'))) 
+
+level <- ggplot(data_4, aes(x = GPP.daily, y = ER.daily, color = Site)) +
+  geom_density_2d()
+
+level
 
 ```
 
